@@ -16,6 +16,8 @@ export type Meta = {
   terms: number;
   built: string;
   crawl: Record<string, unknown>;
+  /** [host, PageRank] for the highest-ranked crawled hosts. */
+  topHosts?: [string, number][];
 };
 
 /** Column-wise document table, so the JSON stays small. */
@@ -73,4 +75,32 @@ export function rank(query: Query, postings: Map<string, [number, number, number
     results.push({ doc, bm25, prBoost, score: bm25 * (1 + meta.prWeight * prBoost), terms });
   }
   return results.sort((x, y) => y.score - x.score).slice(0, limit);
+}
+
+
+/** Keep at most `perHost` results from any one host, preserving order. */
+export function capPerHost<T extends { doc: number }>(results: T[], docs: Docs, perHost = 2): T[] {
+  const seen = new Map<string, number>();
+  return results.filter((r) => {
+    const h = docs.host[r.doc];
+    const n = seen.get(h) ?? 0;
+    seen.set(h, n + 1);
+    return n < perHost;
+  });
+}
+
+export const RRF_K = 60;
+
+/** Reciprocal rank fusion: each list contributes 1 / (k + rank) for every document it ranks. */
+export function fuse(lists: number[][], k = RRF_K): { doc: number; score: number; ranks: (number | null)[] }[] {
+  const acc = new Map<number, { score: number; ranks: (number | null)[] }>();
+  lists.forEach((list, li) =>
+    list.forEach((doc, i) => {
+      const e = acc.get(doc) ?? { score: 0, ranks: lists.map(() => null) };
+      e.score += 1 / (k + i + 1);
+      e.ranks[li] = i + 1;
+      acc.set(doc, e);
+    }),
+  );
+  return [...acc].map(([doc, e]) => ({ doc, ...e })).sort((a, b) => b.score - a.score);
 }

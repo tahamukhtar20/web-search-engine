@@ -3,5 +3,6 @@ data/
 web/public/index/
 dist/
 .wrangler/
+.dev.vars*
 .env*
 !.env.example

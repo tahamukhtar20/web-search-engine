@@ -9,12 +9,25 @@
   "scripts": {
     "crawl": "node crawler/crawl.ts",
     "index": "node indexer/build.ts",
-    "test": "node --test indexer/*.test.ts"
+    "test": "node --test indexer/*.test.ts",
+    "dev": "vite --config web/vite.config.ts",
+    "build": "tsc && vite build --config web/vite.config.ts",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "cheerio": "1.0.0",
+    "lucide-react": "1.71.0",
     "playwright-core": "1.58.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "robots-parser": "3.0.1",
     "stemmer": "2.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.45",
+    "@types/react-dom": "18.2.17",
+    "@vitejs/plugin-react": "4.2.1",
+    "typescript": "5.3.3",
+    "vite": "5.0.8"
   }
 }

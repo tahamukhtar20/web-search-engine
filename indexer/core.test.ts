@@ -81,3 +81,18 @@ test("BM25F prefers head matches and rarer terms; PageRank breaks ties", () => {
   assert.equal(r[1].doc, 2, "PageRank breaks the body-only tie");
   assert.ok(idf(1000, 1) > idf(1000, 500));
 });
+
+test("RRF rewards documents ranked well in both lists", async () => {
+  const { fuse } = await import("../search/core.ts");
+  const f = fuse([[1, 2, 3], [3, 1, 4]]);
+  assert.equal(f[0].doc, 1); // 1st and 2nd
+  assert.deepEqual(f[0].ranks, [1, 2]);
+  assert.equal(f.find((x) => x.doc === 4)!.ranks[0], null);
+  assert.ok(Math.abs(f[0].score - (1 / 61 + 1 / 62)) < 1e-12);
+});
+
+test("capPerHost keeps at most two results per host", async () => {
+  const { capPerHost } = await import("../search/core.ts");
+  const docs = { host: ["a", "a", "a", "b"] } as unknown as Docs;
+  assert.deepEqual(capPerHost([0, 1, 2, 3].map((doc) => ({ doc })), docs).map((r) => r.doc), [0, 1, 3]);
+});

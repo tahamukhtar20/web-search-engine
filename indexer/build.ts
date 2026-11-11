@@ -120,6 +120,12 @@ const meta: Meta = {
   terms: kept,
   built: new Date().toISOString(),
   crawl: { ...crawlStats, hostsInGraph: pr.hosts, pagerankIterations: pr.iterations },
+  // Crawled hosts with the most PageRank, for the "about this index" view.
+  topHosts: [...new Set(docs.host)]
+    .map((h) => [h, pr.rank.get(h) ?? 0] as [string, number])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)
+    .map(([h, r]) => [h, +r.toExponential(3)] as [string, number]),
 };
 writeFileSync(`${opt.out}/meta.json`, JSON.stringify(meta, null, 2));
 writeFileSync(`${opt.crawl}/embed.jsonl`, embed.join("\n") + "\n");
