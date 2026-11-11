@@ -1,0 +1,64 @@
+# Crawl the web from the Tranco top-sites list and build the search index.
+# Run by hand from the Actions tab; the index comes back as a build artifact and is
+# deployed locally with wrangler.
+name: crawl
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: Pages to collect
+        default: "12000"
+      max_seeds:
+        description: Top-ranked domains to use as seeds
+        default: "20000"
+      per_host:
+        description: Pages per domain (home page plus internal pages)
+        default: "4"
+      max_minutes:
+        description: Stop crawling after this many minutes
+        default: "300"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+      - name: Download the Tranco top-sites list
+        run: |
+          curl -fsSL --retry 3 https://tranco-list.eu/top-1m.csv.zip -o tranco.zip
+          unzip -p tranco.zip > seeds.csv
+          head -3 seeds.csv
+
+      - name: Crawl
+        run: >
+          node crawler/crawl.ts --seeds seeds.csv --out data/crawl
+          --max-pages ${{ inputs.max_pages }} --max-seeds ${{ inputs.max_seeds }}
+          --per-host ${{ inputs.per_host }} --max-minutes ${{ inputs.max_minutes }}
+
+      - name: Build the index
+        run: node indexer/build.ts --crawl data/crawl --out web/public/index
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: index
+          path: web/public/index
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: crawl
+          path: |
+            data/crawl/stats.json
+            data/crawl/hosts.jsonl
+            data/crawl/edges.jsonl
+            data/crawl/pages.jsonl
+            data/crawl/embed.jsonl
+          retention-days: 30

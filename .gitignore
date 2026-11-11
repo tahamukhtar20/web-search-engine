@@ -1,16 +1,7 @@
-# ignore ALL .log files
-*.log
-
-# ignore folder
-Crawler/output/*.json
-
-indexing_and_search/output/*.json
-
-# ignore node modules anywhere in the project
 node_modules/
-
-__pycache__/
-
-sample.txt
-
-Flask/bert-base-uncased
+data/
+web/public/index/
+dist/
+.wrangler/
+.env*
+!.env.example
