@@ -2,6 +2,7 @@
   "name": "web-search-engine",
   "private": true,
   "version": "2.0.0",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22.18"
