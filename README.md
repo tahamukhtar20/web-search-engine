@@ -78,9 +78,9 @@ node search/cli.ts web/public/index "open source"
 
 The seed list is from Tranco: Le Pochat et al., "Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation", NDSS 2019. The published index holds each page's URL, title, a short description and its index terms, not the pages' full text.
 
-## History
+## Background
 
-The first version (2024), built together with Muhammad Sunaam, used Puppeteer for every page, a Python TF-IDF indexer with Apache Solr, a BERT re-ranker served from Flask, and PageRank computed separately in notebooks. This version rewrites it in TypeScript with the ranking signals combined in one place.
+Originally a group course project for Big Data Analytics from my BS in Computer Science at NUST (2024), built with Muhammad Sunaam, now updated and deployed as a live demo for my portfolio.
 
 ## License
 
